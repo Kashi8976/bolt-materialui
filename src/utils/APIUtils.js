@@ -1,4 +1,4 @@
-import { API_BASE_URL, ACCESS_TOKEN } from '../constants';
+import { API_BASE_URL, ACCESS_TOKEN, API_RESIGN_URL } from '../constants';
 
 const request = (options) => {
     const headers = new Headers({
@@ -71,4 +71,28 @@ export function getUserProfile(username) {
         method: 'GET'
     });
 }
+
+export function submitResignation(resignationRequest) {
+    return request({
+            url: API_RESIGN_URL,
+            method: 'POST',
+            body: JSON.stringify(resignationRequest)
+        });
+}
+
+
+export function getSubmittedResign(empId) {
+    return request({
+        url: API_RESIGN_URL + "/"+empId,
+        method: 'GET'
+    });
+}
+
+export function updateStatus(empId) {
+    return request({
+        url: API_RESIGN_URL + "/updatestatus?employeeId="+empId+"&status=WITHDRAW",
+        method: 'GET'
+    });
+}
+
 

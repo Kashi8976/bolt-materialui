@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import TextField from '@material-ui/core/TextField';
 import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import FormGroup from '@material-ui/core/FormGroup';
 import Button from '@material-ui/core/Button';
+import {getCurrentUser, submitResignation, getSubmittedResign, updateStatus} from "./utils/APIUtils";
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -30,9 +31,78 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function ResignForm() {
+export default function ResignForm(user) {
     const classes = useStyles();
+    console.log('user from resign ' + user.id);
+    const [resignedUser, setResignedUser] = React.useState({});
+    const currentDay = new Date().toISOString().substring(0, 10);
+    const [resignComment, setResignComment] = React.useState("");
+    const [resignDate, setResignDate] = React.useState("");
+    const [submittedResign, setSubmittedResign] = React.useState({});
 
+    const submitResign = () => {
+        const resignRequest = {
+            user_id: resignedUser.id,
+            reason: resignComment,
+            application_date: new Date(),
+            release_date: resignDate,
+            status: "SUBMIT"
+        }
+        submitResignation(resignRequest).then(response => {
+            if (response) {
+                setSubmittedResign(response);
+            } else {
+                window.location = '/';
+            }
+
+        }).catch(error => {
+
+        });
+        console.log(resignRequest);
+    };
+
+    const withdrawResignation = () => {
+        const resignRequest = {
+            user_id: resignedUser.id,
+            reason: resignComment,
+            application_date: new Date(),
+            release_date: resignDate,
+            status: "WITHDRAW"
+        }
+        updateStatus(resignedUser.id).then(response => {
+            if (response) {
+                window.location = '/dashboard';
+            } else {
+                window.location = '/';
+            }
+
+        }).catch(error => {
+
+        });
+        console.log(resignRequest);
+    }
+
+    useEffect(() => {
+
+        getCurrentUser().then(response => {
+            if (response) {
+
+                setResignedUser(response);
+                getSubmittedResign(response.id).then(response => {
+                    if (response && response.status === "SUBMIT") {
+                        setSubmittedResign(response);
+                        setResignComment(response.reason);
+                        setResignDate(response.release_date.substring(0, 10));
+                    }
+                });
+            } else {
+                window.location = '/';
+            }
+
+        }).catch(error => {
+
+        });
+    }, []);
     return (
         <form className={classes.container} noValidate autoComplete="off">
             <FormGroup>
@@ -44,6 +114,7 @@ export default function ResignForm() {
                         defaultValue="2323423"
                         className={classes.textField}
                         margin="normal"
+                        value={resignedUser.id}
                     />
                     <TextField
                         required
@@ -52,6 +123,7 @@ export default function ResignForm() {
                         defaultValue="User name"
                         className={classes.textField}
                         margin="normal"
+                        value={resignedUser.name}
                     />
                     <TextField
                         required
@@ -60,18 +132,18 @@ export default function ResignForm() {
                         defaultValue="Project Name"
                         className={classes.textField}
                         margin="normal"
+                        value={resignedUser.project}
                     />
                     <TextField
-                        required
-                        id="standard-required"
+                        id="date"
                         label="Joining Date"
-                        defaultValue=""
+                        type="date"
+                        defaultValue="2017-05-24"
                         className={classes.textField}
-                        margin="normal"
-                        type = "date"
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        margin="normal"
                     />
 
                 </div>
@@ -85,6 +157,7 @@ export default function ResignForm() {
                         defaultValue="2323423"
                         className={classes.textField}
                         margin="normal"
+                        value={resignedUser.manager && resignedUser.manager.id}
                     />
                     <TextField
                         required
@@ -93,11 +166,13 @@ export default function ResignForm() {
                         defaultValue="Manager name"
                         className={classes.textField}
                         margin="normal"
+                        value={resignedUser.manager && resignedUser.manager.name}
                     />
                     <TextField
                         id="standard-number"
                         label="Number"
                         type="number"
+                        defaultValue="9002367843"
                         className={classes.textField}
                         InputLabelProps={{
                             shrink: true,
@@ -118,12 +193,13 @@ export default function ResignForm() {
                             required
                             id="outlined-required"
                             label="Reason"
-                            defaultValue="Hello World11"
                             className={classes.textFieldLarge}
                             margin="normal"
                             variant="outlined"
                             multiline
                             InputProps={"height: 100px"}
+                            value={resignComment}
+                            onChange={e=> setResignComment(e.target.value)}
                         />
                         <TextField
                             id="outlined-disabled"
@@ -135,18 +211,21 @@ export default function ResignForm() {
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            value={currentDay}
 
                         />
                         <TextField
                             id="outlined-password-input"
                             className={classes.textField}
                             type="date"
-                            label= "Expected Realease Date"
+                            label="Expected Realease Date"
                             margin="normal"
                             variant="outlined"
+                            value={resignDate}
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            onChange={e=> setResignDate(e.target.value)}
                         />
                     </Grid>
                 </div>
@@ -158,15 +237,15 @@ export default function ResignForm() {
                         alignItems="baseline"
                     >
 
-                        <Button variant="contained" className={classes.button}>
+                        <Button variant="contained"  disabled = {(submittedResign.reason && submittedResign.reason.length > 0)} className={classes.button}>
                             Cancel
                         </Button>
 
-                        <Button variant="contained" color="primary" className={classes.button}>
+                        <Button variant="contained" color="primary"  disabled = {(submittedResign.reason && submittedResign.reason.length > 0)} className={classes.button} onClick={submitResign}>
                             Submit
                         </Button>
 
-                        <Button variant="contained" color="secondary" disabled  className={classes.button}>
+                        <Button variant="contained" color="secondary" disabled = {!(submittedResign.reason && submittedResign.reason.length > 0)} className={classes.button} onClick={withdrawResignation}>
                             Withdraw
                         </Button>
                     </Grid>

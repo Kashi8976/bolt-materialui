@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, {useEffect} from "react";
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
@@ -8,14 +8,12 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import ResignForm from './ResignForm';
 import NestedLists from './NestedLists';
 import {getCurrentUser} from "./utils/APIUtils";
@@ -23,7 +21,6 @@ import {ACCESS_TOKEN} from "./constants";
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import { Redirect } from 'react-router-dom'
 
 function Copyright() {
     return (
@@ -148,10 +145,10 @@ export default function Dashboard() {
         setAnchorEl(null);
     };
 
-     const handleLogout = (redirectTo="/", notificationType="success", description="You're successfully logged out.") => {
+    const handleLogout = (redirectTo = "/", notificationType = "success", description = "You're successfully logged out.") => {
         localStorage.removeItem(ACCESS_TOKEN);
         setUser({})
-         window.location = '/';
+        window.location = '/';
     }
 
     const handleDrawerOpen = () => {
@@ -163,7 +160,7 @@ export default function Dashboard() {
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight)
     useEffect(() => {
         getCurrentUser().then(response => {
-            if(response) {
+            if (response) {
                 setUser(response);
             } else {
                 window.location = '/';
@@ -174,12 +171,12 @@ export default function Dashboard() {
         });
     }, []);
 
-    if (!localStorage.getItem(ACCESS_TOKEN)){
-        window.location = '/' ;
+    if (!localStorage.getItem(ACCESS_TOKEN)) {
+        window.location = '/';
     }
     return (
         <div className={classes.root}>
-            <CssBaseline />
+            <CssBaseline/>
             <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
                 <Toolbar className={classes.toolbar}>
                     <IconButton
@@ -189,52 +186,42 @@ export default function Dashboard() {
                         onClick={handleDrawerOpen}
                         className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
                     >
-                        <MenuIcon />
+                        <MenuIcon/>
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                         Resignation Dashboard
                     </Typography>
-                    <AppBar position="static">
-                        <Toolbar>
-                            <IconButton edge="start" className={classes.iconMenuButton} color="inherit" aria-label="menu">
-                                <MenuIcon />
+                    {user && (
+                        <div>
+                            <IconButton
+                                aria-label="account of current user"
+                                aria-controls="menu-appbar"
+                                aria-haspopup="true"
+                                onClick={handleMenu}
+                                color="inherit"
+                            >
+                                <AccountCircle/>
                             </IconButton>
-                            <Typography variant="h6" className={classes.iconTitle}>
-                                Photos
-                            </Typography>
-                            {user && (
-                                <div>
-                                    <IconButton
-                                        aria-label="account of current user"
-                                        aria-controls="menu-appbar"
-                                        aria-haspopup="true"
-                                        onClick={handleMenu}
-                                        color="inherit"
-                                    >
-                                        <AccountCircle />
-                                    </IconButton>
-                                    <Menu
-                                        id="menu-appbar"
-                                        anchorEl={anchorEl}
-                                        anchorOrigin={{
-                                            vertical: 'top',
-                                            horizontal: 'right',
-                                        }}
-                                        keepMounted
-                                        transformOrigin={{
-                                            vertical: 'top',
-                                            horizontal: 'right',
-                                        }}
-                                        open={openAnchor}
-                                        onClose={handleClose}
-                                    >
-                                        <MenuItem onClick={handleClose}>{user.username}</MenuItem>
-                                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                                    </Menu>
-                                </div>
-                            )}
-                        </Toolbar>
-                    </AppBar>
+                            <Menu
+                                id="menu-appbar"
+                                anchorEl={anchorEl}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                open={openAnchor}
+                                onClose={handleClose}
+                            >
+                                <MenuItem onClick={handleClose}>{user.username}</MenuItem>
+                                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                            </Menu>
+                        </div>
+                    )}
                 </Toolbar>
             </AppBar>
             <Drawer
@@ -246,21 +233,21 @@ export default function Dashboard() {
             >
                 <div className={classes.toolbarIcon}>
                     <IconButton onClick={handleDrawerClose}>
-                        <ChevronLeftIcon />
+                        <ChevronLeftIcon/>
                     </IconButton>
                 </div>
-                <Divider />
-               <NestedLists/>
+                <Divider/>
+                <NestedLists/>
             </Drawer>
             <main className={classes.content}>
-                <div className={classes.appBarSpacer} />
+                <div className={classes.appBarSpacer}/>
                 <Container maxWidth="lg" className={classes.container}>
-                <Grid item xs={12}>
-                    <Paper className={classes.paper}>
-                        <ResignForm />
-                    </Paper>
-                </Grid>
-            </Container>
+                    <Grid item xs={12}>
+                        <Paper className={classes.paper}>
+                            <ResignForm user={user}/>
+                        </Paper>
+                    </Grid>
+                </Container>
             </main>
         </div>
     );
