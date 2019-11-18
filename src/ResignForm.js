@@ -86,7 +86,6 @@ export default function ResignForm(user) {
 
         getCurrentUser().then(response => {
             if (response) {
-
                 setResignedUser(response);
                 getSubmittedResign(response.id).then(response => {
                     if (response && response.status === "SUBMIT") {
